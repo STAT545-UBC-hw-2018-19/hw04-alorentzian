@@ -1,0 +1,161 @@
+---
+title: "hw04"
+output: github_document
+---
+
+```{r setup, include=TRUE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r load_packages}
+library(tidyverse)
+library(gapminder)
+library(dplyr)
+
+```
+
+First I will select the data that I am interested in. I will look at lifeExp by year for Canada, China, and Ethiopia.
+
+```{r visualize_gapminder}
+print(gapminder)
+```
+Next i will filter the data to create the data frame
+
+```{r create_dataframe}
+dat <- gapminder %>% 
+select(year, lifeExp, country) %>% 
+  filter(country %in% c("Canada", "China", "Ethiopia"))
+
+dat 
+```
+
+
+now i will reshape
+
+```{r tidy_data_spread}
+tidy_dat <- dat %>% 
+  spread(country, lifeExp)
+```
+
+Now that I have my data table I will try some scatter plots to compare the lifeExp of different countries
+
+```{r lifeExp_scatterplots}
+library(ggplot2)
+
+tidy_dat %>% 
+  ggplot(aes(China, Canada)) + 
+  geom_point()
+
+tidy_dat %>% 
+  ggplot(aes(China, Ethiopia)) + 
+  geom_point()
+
+tidy_dat %>% 
+  ggplot(aes(Canada, Ethiopia)) + 
+  geom_point()
+
+```
+I will now create a cheat sheet similar to Jenny Bryan's but using TV shows and genres.
+
+First I will create my two datasets using the tribble function. 
+
+```{r creating_dataframe}
+actors <- tribble(
+~Actor, ~Show, ~Genre, ~like, 
+"Jennifer Anistion", "Friends", "Sitcom", "Like",
+"Mandy Moore", "This is Us", "Drama", "Like",
+"Blake Lively", "Gossip Girl","Drama", "Dislike",
+"Ed O'Neill", "Modern Family", "Sitcom", "Like",
+"Meghan Markle", "Suits", "Drama","Like",
+)
+
+actors
+
+networks <- tribble(
+~Network, ~Show,
+"NBC","Friends",
+"NBC","This is Us",
+"USA", "Modern Family",
+"USA", "Suits",
+"CBS", "2 and a half men",
+)
+
+networks
+```
+```{r knit_tables}
+knitr::kable(actors)
+knitr::kable(networks)
+```
+
+
+
+The common header between the two datasets is "Show". I also included CBS in the networks data set but not the actors data set, and the show gossip girl in the actors data set but not the networks data set.
+
+Now I will try different ways to join the tables.
+
+```{r left_join}
+left_join(actors,networks)
+```
+
+This merged the networks data with the actors data, so all actors are included but there is an NA for Blake Lively because her show is on the CW which was not included in the network data set. 
+
+Now I will join the inverse and see what it looks like.
+
+```{r left_join_inverse}
+left_join(networks,actors)
+```
+
+Now blake lively is missing from the data set as expected. Also, CBS is now included.
+
+
+If I right join in the same order, I should get the same results as the first left join (line 95)
+
+```{r right_join}
+right_join(networks,actors)
+```
+
+I do see the same results, in a slightly different order of columns. 
+
+
+Now I will try the inner join function
+
+```{r inner_join}
+inner_join(actors,networks)
+```
+Now we only see information that is identical in both data sets.
+
+Next I will try semi-join and anti-join.
+
+```{r semi_join}
+semi_join(actors,networks)
+```
+this is different from inner join because now network is not included since there is a difference in this column.
+
+```{r anti_join}
+anti_join(actors,networks)
+anti_join(networks,actors)
+```
+
+Now we see the only difference between the two datasets.
+
+Finally I will do a full join to see ALL of the data
+
+```{r full_join}
+full_join(actors,networks)
+```
+Now I will try to explore some other funtions that are similar to the join function, such as merge and match.
+
+```{r merge}
+merge(actors,networks)
+```
+This looks similar to an inner join where only the common values are kept. 
+
+
+
+
+
+
+
+
+
+
